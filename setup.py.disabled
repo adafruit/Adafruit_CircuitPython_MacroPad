@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2017 Scott Shawcroft, written for Adafruit Industries
+# SPDX-FileCopyrightText: Copyright (c) 2021 Kattni Rembor for Adafruit Industries
+#
+# SPDX-License-Identifier: MIT
+
+"""
+This library is not deployed to PyPI. It is either a board-specific helper library, or
+does not make sense for use on or is incompatible with single board computers and Linux.
+"""

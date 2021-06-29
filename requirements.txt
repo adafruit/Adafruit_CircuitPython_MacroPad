@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2017 Scott Shawcroft, written for Adafruit Industries
+# SPDX-FileCopyrightText: Copyright (c) 2021 Kattni Rembor for Adafruit Industries
+#
+# SPDX-License-Identifier: MIT
+
+Adafruit-Blinka
+adafruit-circuitpython-displayio-sh1106
+adafruit-circuitpython-hid
+adafruit-circuitpython-midi
+adafruit-circuitpython-neopixel

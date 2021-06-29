@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: 2020 Diego Elio Pettenò
+#
+# SPDX-License-Identifier: Unlicense
+
+repos:
+-   repo: https://github.com/python/black
+    rev: 20.8b1
+    hooks:
+    - id: black
+-   repo: https://github.com/fsfe/reuse-tool
+    rev: v0.12.1
+    hooks:
+    - id: reuse
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+-   repo: https://github.com/pycqa/pylint
+    rev: pylint-2.7.1
+    hooks:
+    -   id: pylint
+        name: pylint (library code)
+        types: [python]
+        exclude: "^(docs/|examples/|tests/|setup.py$)"
+-   repo: local
+    hooks:
+    -   id: pylint_examples
+        name: pylint (examples code)
+        description: Run pylint rules on "examples/*.py" files
+        entry: /usr/bin/env bash -c
+        args: ['([[ ! -d "examples" ]] || for example in $(find . -path "./examples/*.py"); do pylint --disable=missing-docstring,invalid-name $example; done)']
+        language: system
+    -   id: pylint_tests
+        name: pylint (tests code)
+        description: Run pylint rules on "tests/*.py" files
+        entry: /usr/bin/env bash -c
+        args: ['([[ ! -d "tests" ]] || for test in $(find . -path "./tests/*.py"); do pylint --disable=missing-docstring $test; done)']
+        language: system
