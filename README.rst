@@ -30,16 +30,35 @@ This driver depends on:
 
 * `Adafruit CircuitPython <https://github.com/adafruit/circuitpython>`_
 
+* `Adafruit's CircuitPython NeoPixel library
+  <https://github.com/adafruit/Adafruit_CircuitPython_NeoPixel>`_
+
+* `Adafruit's CircuitPython HID library
+  <https://github.com/adafruit/Adafruit_CircuitPython_HID>`_
+
+* `Adafruit's CircuitPython MIDI library
+  <https://github.com/adafruit/Adafruit_CircuitPython_MIDI>`_
+
+* `Adafruit's CircuitPython Display Text library
+  <https://github.com/adafruit/Adafruit_CircuitPython_Display_Text>`_
+
+* `Adafruit's CircuitPython Simple Text Display library
+  <https://github.com/adafruit/Adafruit_CircuitPython_Simple_Text_Display>`_
+
+* `Adafruit's CircuitPython Debouncer library
+  <https://github.com/adafruit/Adafruit_CircuitPython_Debouncer>`_
+
 Please ensure all dependencies are available on the CircuitPython filesystem.
 This is easily achieved by downloading
 `the Adafruit library and driver bundle <https://circuitpython.org/libraries>`_
 or individual libraries can be installed using
 `circup <https://github.com/adafruit/circup>`_.
 
-This library is designed to work withe the Adafruit MacroPad RP2040.
+This library is designed to work withe the Adafruit MacroPad RP2040. Consider
+purchasing one from the Adafruit shop:
 
-`Purchase one from the Adafruit shop <http://www.adafruit.com/products/5100>`_
-
+`Adafruit MacroPad RP2040 Bare Bones <http://www.adafruit.com/products/5100>`_
+`Adafruit MacroPad RP2040 Starter Kit <https://www.adafruit.com/product/5128>`_
 
 Installing to a Connected CircuitPython Device with Circup
 ==========================================================
@@ -66,8 +85,23 @@ Or the following command to update an existing version:
 
 Usage Example
 =============
+This example prints out the key pressed, the relative position of the rotary encoder and the
+state of the rotary encoder switch.
 
-.. todo:: Add a quick, simple example. It and other examples should live in the
+.. code-block:: python
+
+    from adafruit_macropad import MacroPad
+    import time
+
+    macropad = MacroPad()
+
+    while True:
+        key_event = macropad.keys.events.get()
+        if key_event and key_event.pressed:
+         print("Key pressed: {}".format(key_event.key_number))
+        print("Encoder: {}".format(macropad.encoder))
+        print("Encoder switch: {}".format(macropad.encoder_switch))
+        time.sleep(0.4)
 
 Contributing
 ============

@@ -26,8 +26,8 @@ extensions = [
 # digitalio, micropython and busio. List the modules you use. Without it, the
 # autodoc module docs will fail to generate with a warning.
 autodoc_mock_imports = ["board", "digitalio", "rotaryio", "keypad", "neopixel", "usb_hid",
-                        "usb_midi", "adafruit_hid", "adafruit_midi", "adafruit_simple_text_display"
-                        ]
+                        "usb_midi", "adafruit_hid", "adafruit_midi", "adafruit_simple_text_display",
+                        "displayio", "audiopwmio", "audiocore", "adafruit_debouncer"]
 
 
 intersphinx_mapping = {

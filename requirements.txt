@@ -9,3 +9,4 @@ adafruit-circuitpython-midi
 adafruit-circuitpython-neopixel
 adafruit-circuitpython-display-text
 adafruit-circuitpython-simple-display-text
+adafruit-circuitpython-debouncer
