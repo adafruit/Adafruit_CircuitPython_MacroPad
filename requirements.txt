@@ -4,7 +4,9 @@
 # SPDX-License-Identifier: MIT
 
 Adafruit-Blinka
-adafruit-circuitpython-displayio-sh1106
 adafruit-circuitpython-hid
 adafruit-circuitpython-midi
 adafruit-circuitpython-neopixel
+adafruit-circuitpython-display-text
+adafruit-circuitpython-simple-text-display
+adafruit-circuitpython-debouncer
