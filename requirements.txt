@@ -8,5 +8,5 @@ adafruit-circuitpython-hid
 adafruit-circuitpython-midi
 adafruit-circuitpython-neopixel
 adafruit-circuitpython-display-text
-adafruit-circuitpython-simple-display-text
+adafruit-circuitpython-simple-text-display
 adafruit-circuitpython-debouncer
