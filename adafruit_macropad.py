@@ -109,74 +109,41 @@ class MacroPad:
         if rotation not in (0, 90, 180, 270):
             raise ValueError("Only 90 degree rotations are supported.")
 
-        # Define keys:
+        # Define LEDs:
+        self._pixels = neopixel.NeoPixel(board.NEOPIXEL, 12)
+        self._led = digitalio.DigitalInOut(board.LED)
+        self._led.switch_to_output()
+
+        # Define key and pixel maps based on rotation:
+        self._rotated_pixels = None
+        self._key_pins = None
+
+        def _keys_and_pixels(order=None):
+            """
+            Generate key and pixel maps based on a specified order.
+            :param order: The order of the keys and pixels.
+            """
+            if not order:
+                order = list(range(12))
+            self._key_pins = [getattr(board, "KEY%d" % (num + 1)) for num in order]
+            self._rotated_pixels = _PixelMapLite(self._pixels, order=order)
+
         if rotation == 0:
-            self._key_pins = (
-                board.KEY1,
-                board.KEY2,
-                board.KEY3,
-                board.KEY4,
-                board.KEY5,
-                board.KEY6,
-                board.KEY7,
-                board.KEY8,
-                board.KEY9,
-                board.KEY10,
-                board.KEY11,
-                board.KEY12,
-            )
+            _keys_and_pixels()
 
         if rotation == 90:
-            self._key_pins = (
-                board.KEY3,
-                board.KEY6,
-                board.KEY9,
-                board.KEY12,
-                board.KEY2,
-                board.KEY5,
-                board.KEY8,
-                board.KEY11,
-                board.KEY1,
-                board.KEY4,
-                board.KEY7,
-                board.KEY10,
-            )
+            _keys_and_pixels(order=(2, 5, 8, 11, 1, 4, 7, 10, 0, 3, 6, 9))
 
         if rotation == 180:
-            self._key_pins = (
-                board.KEY12,
-                board.KEY11,
-                board.KEY10,
-                board.KEY9,
-                board.KEY8,
-                board.KEY7,
-                board.KEY6,
-                board.KEY5,
-                board.KEY4,
-                board.KEY3,
-                board.KEY2,
-                board.KEY1,
-            )
+            _keys_and_pixels(order=(11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0))
 
         if rotation == 270:
-            self._key_pins = (
-                board.KEY10,
-                board.KEY7,
-                board.KEY4,
-                board.KEY1,
-                board.KEY11,
-                board.KEY8,
-                board.KEY5,
-                board.KEY2,
-                board.KEY12,
-                board.KEY9,
-                board.KEY6,
-                board.KEY3,
-            )
+            _keys_and_pixels(order=(9, 6, 3, 0, 10, 7, 4, 1, 11, 8, 5, 2))
 
+        # Define keys:
         self._keys = keypad.Keys(self._key_pins, value_when_pressed=False, pull=True)
 
-        # Define rotary encoder:
+        # Define rotary encoder and encoder switch:
         self._encoder = rotaryio.IncrementalEncoder(board.ROTA, board.ROTB)
         self._encoder_switch = digitalio.DigitalInOut(board.BUTTON)
         self._encoder_switch.switch_to_input(pull=digitalio.Pull.UP)
@@ -192,11 +159,6 @@ class MacroPad:
         self._sample = None
         self._sine_wave = None
         self._sine_wave_sample = None
-
-        # Define LEDs:
-        self._pixels = neopixel.NeoPixel(board.NEOPIXEL, 12, brightness=0.5)
-        self._led = digitalio.DigitalInOut(board.LED)
-        self._led.switch_to_output()
 
         # Define HID:
         self._keyboard = Keyboard(usb_hid.devices)
@@ -280,7 +242,7 @@ class MacroPad:
                 macropad.pixels[0] = (255, 0, 0)
                 macropad.pixels[11] = (0, 0, 255)
         """
-        return self._pixels
+        return self._rotated_pixels
 
     @property
     def red_led(self):
@@ -908,3 +870,45 @@ class MacroPad:
             while audio.playing:
                 pass
         self._speaker_enable.value = False
+
+
+class _PixelMapLite:
+    """Generate a pixel map based on a specified order. Designed to work with a set of 12 pixels,
+    e.g. the MacroPad keypad LEDs.
+
+    :param pixels: The pixel object.
+    :param tuple order: The specified order of the pixels. Pixels are numbered 0-11. Defaults to
+                        numerical order, ``0`` to ``11``.
+    """
+
+    def __init__(self, pixels, order=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)):
+        self._pixels = pixels
+        self._order = order
+        self._num_pixels = len(self._pixels)
+
+        # Copy methods from _pixels
+        for attr in dir(pixels):
+            if not attr.startswith("__") or attr in ("__enter__", "__exit__"):
+                setattr(self, attr, getattr(pixels, attr))
+
+    def __setitem__(self, index, val):
+        if isinstance(index, slice):
+            for val_i, in_i in enumerate(range(*index.indices(self._num_pixels))):
+                self._pixels[in_i] = self._order[val_i]
+        else:
+            self._pixels[self._order[index]] = val
+
+    def __getitem__(self, index):
+        if isinstance(index, slice):
+            return [
+                self._pixels[self._order[idx]]
+                for idx in range(*index.indices(self._num_pixels))
+            ]
+        if index < 0:
+            index += self._num_pixels
+        if index >= self._num_pixels or index < 0:
+            raise IndexError
+        return self._pixels[self._order[index]]
+
+    def __repr__(self):
+        return self._pixels.__repr__()
