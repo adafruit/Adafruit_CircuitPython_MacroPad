@@ -6,3 +6,9 @@
 
 .. automodule:: adafruit_macropad
     :members:
+
+.. autoattribute:: MacroPad.Keycode
+
+.. autoattribute:: MacroPad.ConsumerControlCode
+
+.. autoattribute:: MacroPad.Mouse
