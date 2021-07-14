@@ -912,6 +912,18 @@ class _PixelMapLite:
         return self._pixels.__repr__()
 
     @property
+    def auto_write(self):
+        """
+        True if the neopixels should immediately change when set. If False, ``show`` must be
+        called explicitly.
+        """
+        return self._pixels.auto_write
+
+    @auto_write.setter
+    def auto_write(self, value):
+        self._pixels.auto_write = value
+
+    @property
     def brightness(self):
         """Overall brightness of the pixel (0 to 1.0)."""
         return self._pixels.brightness
