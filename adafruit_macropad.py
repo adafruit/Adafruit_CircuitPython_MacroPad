@@ -884,12 +884,10 @@ class _PixelMapLite:
     def __init__(self, pixels, order=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)):
         self._pixels = pixels
         self._order = order
-        self._num_pixels = len(self._pixels)
-
-        # Copy methods from _pixels
-        for attr in dir(pixels):
-            if not attr.startswith("__") or attr in ("__enter__", "__exit__"):
-                setattr(self, attr, getattr(pixels, attr))
+        self._num_pixels = len(pixels)
+        self.fill = pixels.fill
+        self.show = pixels.show
+        self.n = self._num_pixels
 
     def __setitem__(self, index, val):
         if isinstance(index, slice):
@@ -912,3 +910,12 @@ class _PixelMapLite:
 
     def __repr__(self):
         return self._pixels.__repr__()
+
+    @property
+    def brightness(self):
+        """Overall brightness of the pixel (0 to 1.0)."""
+        return self._pixels.brightness
+
+    @brightness.setter
+    def brightness(self, value):
+        self._pixels.brightness = value
