@@ -75,7 +75,7 @@ following command to install:
 
 .. code-block:: shell
 
-    circup install macropad
+    circup install adafruit_macropad
 
 Or the following command to update an existing version:
 
