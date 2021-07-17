@@ -911,6 +911,9 @@ class _PixelMapLite:
     def __repr__(self):
         return self._pixels.__repr__()
 
+    def __len__(self):
+        return len(self._pixels)
+
     @property
     def auto_write(self):
         """
