@@ -25,7 +25,7 @@ title = label.Label(
 layout = GridLayout(x=0, y=10, width=128, height=54, grid_size=(3, 4), cell_padding=5)
 labels = []
 for _ in range(12):
-    labels.append(label.Label(terminalio.FONT, text="", max_glyphs=10))
+    labels.append(label.Label(terminalio.FONT, text=""))
 
 for index in range(12):
     x = index % 3
