@@ -273,7 +273,7 @@ class MacroPad:
     def keys(self):
         """
         The keys on the MacroPad. Uses events to track key number and state, e.g. pressed or
-        released. You must fetch the events using ``keys.event.get()`` and then the events are
+        released. You must fetch the events using ``keys.events.get()`` and then the events are
         available for usage in your code. Each event has three properties:
 
         * ``key_number``: the number of the key that changed. Keys are numbered starting at 0.
@@ -292,7 +292,7 @@ class MacroPad:
             macropad = MacroPad()
 
             while True:
-                event = macropad.keys.event.get()
+                event = macropad.keys.events.get()
                 if event:
                     print(event)
         """
