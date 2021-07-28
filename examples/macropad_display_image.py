@@ -8,5 +8,7 @@ from adafruit_macropad import MacroPad
 
 macropad = MacroPad()
 
+macropad.display_image("blinka.bmp")
+
 while True:
-    macropad.display_image("blinka.bmp")
+    pass
