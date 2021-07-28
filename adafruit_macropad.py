@@ -161,11 +161,10 @@ class MacroPad:
         self._sine_wave_sample = None
 
         # Define HID:
-        self._keyboard = Keyboard(usb_hid.devices)
-        # This will need to be updated if we add more keyboard layouts. Currently there is only US.
-        self._keyboard_layout = KeyboardLayoutUS(self._keyboard)
-        self._consumer_control = ConsumerControl(usb_hid.devices)
-        self._mouse = Mouse(usb_hid.devices)
+        self._keyboard = None
+        self._keyboard_layout = None
+        self._consumer_control = None
+        self._mouse = None
 
         # Define MIDI:
         self._midi = adafruit_midi.MIDI(
@@ -380,6 +379,8 @@ class MacroPad:
                 if macropad.encoder_switch:
                     macropad.keyboard.send(macropad.Keycode.A)
         """
+        if self._keyboard is None:
+            self._keyboard = Keyboard(usb_hid.devices)
         return self._keyboard
 
     @property
@@ -402,6 +403,10 @@ class MacroPad:
                 if macropad.encoder_switch:
                     macropad.keyboard_layout.write("Hello World")
         """
+        if self._keyboard is None:
+            self._keyboard = Keyboard(usb_hid.devices)
+        # This will need to be updated if we add more keyboard layouts. Currently there is only US.
+        self._keyboard_layout = KeyboardLayoutUS(self._keyboard)
         return self._keyboard_layout
 
     @property
@@ -421,6 +426,8 @@ class MacroPad:
                 if macropad.encoder_switch:
                     macropad.consumer_control.send(macropad.ConsumerControlCode.VOLUME_DECREMENT)
         """
+        if self._consumer_control is None:
+            self._consumer_control = ConsumerControl(usb_hid.devices)
         return self._consumer_control
 
     @property
@@ -441,6 +448,8 @@ class MacroPad:
                 if macropad.encoder_switch:
                     macropad.mouse.click(macropad.Mouse.LEFT_BUTTON)
         """
+        if self._mouse is None:
+            self._mouse = Mouse(usb_hid.devices)
         return self._mouse
 
     @property
