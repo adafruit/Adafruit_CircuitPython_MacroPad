@@ -8,10 +8,10 @@ off on the next press.
 """
 import displayio
 import terminalio
+from rainbowio import colorwheel
 from adafruit_display_text import bitmap_label as label
 from adafruit_displayio_layout.layouts.grid_layout import GridLayout
 from adafruit_macropad import MacroPad
-from rainbowio import colorwheel
 
 macropad = MacroPad()
 

@@ -292,9 +292,9 @@ class MacroPad:
             macropad = MacroPad()
 
             while True:
-                event = macropad.keys.events.get()
-                if event:
-                    print(event)
+                key_event = macropad.keys.events.get()
+                if key_event:
+                    print(key_event)
         """
         return self._keys
 
@@ -748,9 +748,9 @@ class MacroPad:
             text_lines = macropad.display_text(title="MacroPad Info")
 
             while True:
-                event = macropad.keys.events.get()
-                if event:
-                    text_lines[0].text = "Key {} pressed!".format(event.key_number)
+                key_event = macropad.keys.events.get()
+                if key_event:
+                    text_lines[0].text = "Key {} pressed!".format(key_event.key_number)
                 text_lines[1].text = "Rotary encoder {}".format(macropad.encoder)
                 text_lines[2].text = "Encoder switch: {}".format(macropad.encoder_switch)
                 text_lines.show()
