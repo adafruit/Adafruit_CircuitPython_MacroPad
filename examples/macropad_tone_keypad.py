@@ -12,6 +12,7 @@ macropad = MacroPad()
 
 tones = [196, 220, 246, 262, 294, 330, 349, 392, 440, 494, 523, 587]
 
+key_playing = None
 while True:
     key_event = macropad.keys.events.get()
 
@@ -20,8 +21,11 @@ while True:
             macropad.pixels[key_event.key_number] = colorwheel(
                 int(255 / 12) * key_event.key_number
             )
-            macropad.start_tone(tones[key_event.key_number])
+            macropad.stop_tone()  #  stop previous tone (if any)
+            key_playing = key_event.key_number
+            macropad.start_tone(tones[key_playing])
 
         else:
-            macropad.pixels.fill((0, 0, 0))
-            macropad.stop_tone()
+            if key_event.key_number == key_playing:
+                macropad.pixels.fill((0, 0, 0))
+                macropad.stop_tone()
