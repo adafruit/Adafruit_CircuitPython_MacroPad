@@ -405,8 +405,8 @@ class MacroPad:
         """
         if self._keyboard is None:
             self._keyboard = Keyboard(usb_hid.devices)
-        # This will need to be updated if we add more keyboard layouts. Currently there is only US.
-        self._keyboard_layout = KeyboardLayoutUS(self._keyboard)
+            # This will need to be updated if we add more layouts. Currently there is only US.
+            self._keyboard_layout = KeyboardLayoutUS(self._keyboard)
         return self._keyboard_layout
 
     @property
