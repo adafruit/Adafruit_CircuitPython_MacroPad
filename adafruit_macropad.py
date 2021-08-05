@@ -403,10 +403,9 @@ class MacroPad:
                 if macropad.encoder_switch:
                     macropad.keyboard_layout.write("Hello World")
         """
-        if self._keyboard is None:
-            self._keyboard = Keyboard(usb_hid.devices)
+        if self._keyboard_layout is None:
             # This will need to be updated if we add more layouts. Currently there is only US.
-            self._keyboard_layout = KeyboardLayoutUS(self._keyboard)
+            self._keyboard_layout = KeyboardLayoutUS(self.keyboard)
         return self._keyboard_layout
 
     @property
