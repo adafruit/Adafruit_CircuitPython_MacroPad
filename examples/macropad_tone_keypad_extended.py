@@ -20,11 +20,11 @@ macropad.pixels.auto_write = False
 tones = [196, 220, 246, 262, 294, 330, 349, 392, 440, 494, 523, 587]
 
 # When a key is pressed we'll append it to the end, and when a key is
-# released we'll remove it. This results in a list of pressed keys in 
+# released we'll remove it. This results in a list of pressed keys in
 # the order they were pressed.
 key_pressed_stack = []
 
-# When at least one key is pressed, this will 
+# When at least one key is pressed, this will
 # be the index of the currently playing note.
 playing_index = None
 
@@ -35,7 +35,8 @@ def rgb_from_int(rgb):
     r = (rgb >> 16) & 255
     return r, g, b
 
-# Loop forever, until the heat death of the universe 
+
+# Loop forever, until the heat death of the universe
 # (or we lose power, whichever comes first).
 while True:
     # To save time, we'll only update the pixels when a key event happens.
@@ -80,7 +81,7 @@ while True:
     else:
         # If a tone was playing, stop it.
         if playing_index is not None:
-            macropad.stop_tone()            
+            macropad.stop_tone()
             playing_index = None
 
     # If a key was pressed or released, update the pixels for the pressed keys.
@@ -99,4 +100,3 @@ while True:
 
         # Don't forget to show the pixels!
         macropad.pixels.show()
-    
