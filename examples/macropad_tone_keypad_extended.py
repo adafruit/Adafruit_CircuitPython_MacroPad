@@ -4,12 +4,12 @@
 """
 MacroPad extended tone demo. Expands upon the basic tone demo by using
 a stack to track pressed keys, allowing multiple keys to be pressed at once,
-while preserving the order they were pressed. Also, improved responsiveness by 
+while preserving the order they were pressed. Also, improved responsiveness by
 updating the Neopixels only when one of the key states has changed.
 """
 
-from adafruit_macropad import MacroPad
 from rainbowio import colorwheel
+from adafruit_macropad import MacroPad
 
 macropad = MacroPad()
 
@@ -30,10 +30,10 @@ playing_index = None
 
 # Helper to convert an integer to an rgb value.
 def rgb_from_int(rgb):
-    b = rgb & 255
-    g = (rgb >> 8) & 255
-    r = (rgb >> 16) & 255
-    return r, g, b
+    blue = rgb & 255
+    green = (rgb >> 8) & 255
+    red = (rgb >> 16) & 255
+    return red, green, blue
 
 
 # Loop forever, until the heat death of the universe
