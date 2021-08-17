@@ -28,4 +28,3 @@ while True:
 
         else:
             macropad.pixels.fill((0, 0, 0))
-            macropad.stop_tone()
