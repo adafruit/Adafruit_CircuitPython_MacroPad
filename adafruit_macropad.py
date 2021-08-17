@@ -54,6 +54,7 @@ import neopixel
 import displayio
 import audiopwmio
 import audiocore
+import audiomp3
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keycode import Keycode
@@ -851,9 +852,11 @@ class MacroPad:
         self._speaker_enable.value = False
 
     def play_file(self, file_name):
-        """Play a .wav file using the onboard speaker.
+        """Play a .wav or .mp3 file using the onboard speaker.
 
-        :param file_name: The name of your .wav file in quotation marks including .wav
+        :param file_name: The name of your .wav or .mp3 file in quotation marks including
+                          .wav or .mp3, e.g. "sound.wav" or "sound.mp3". Include location if file
+                          is placed somewhere other than /, e.g. "audio/sound.wav".
 
         The following example plays the file "sound.wav" when the rotary encoder switch is pressed.
 
@@ -866,17 +869,39 @@ class MacroPad:
             while True:
                 if macropad.encoder_switch:
                     macropad.play_file("sound.wav")
+
+        The following example plays the file "sound.mp3" when the rotary encoder switch is pressed.
+
+        .. code-block:: python
+
+            from adafruit_macropad import MacroPad
+
+            macropad = MacroPad()
+
+            while True:
+                if macropad.encoder_switch:
+                    macropad.play_file("sound.mp3")
         """
-        # Play a specified file.
         self.stop_tone()
         self._speaker_enable.value = True
-        with audiopwmio.PWMAudioOut(
-            board.SPEAKER
-        ) as audio:  # pylint: disable=not-callable
-            wavefile = audiocore.WaveFile(open(file_name, "rb"))
-            audio.play(wavefile)
-            while audio.playing:
-                pass
+        if file_name.lower().endswith(".wav"):
+            with audiopwmio.PWMAudioOut(
+                board.SPEAKER
+            ) as audio:  # pylint: disable=not-callable
+                wavefile = audiocore.WaveFile(open(file_name, "rb"))
+                audio.play(wavefile)
+                while audio.playing:
+                    pass
+        elif file_name.lower().endswith(".mp3"):
+            with audiopwmio.PWMAudioOut(
+                board.SPEAKER
+            ) as audio:  # pylint: disable=not-callable
+                mp3file = audiomp3.MP3Decoder(open(file_name, "rb"))
+                audio.play(mp3file)
+                while audio.playing:
+                    pass
+        else:
+            raise ValueError("Filetype must be wav or MP3.")
         self._speaker_enable.value = False
 
 

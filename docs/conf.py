@@ -40,6 +40,7 @@ autodoc_mock_imports = [
     "audiopwmio",
     "audiocore",
     "adafruit_debouncer",
+    "audiomp3",
 ]
 
 
