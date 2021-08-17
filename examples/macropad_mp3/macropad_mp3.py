@@ -12,7 +12,7 @@ from adafruit_macropad import MacroPad
 macropad = MacroPad()
 
 # To include more MP3 files, add the names to this list in the same manner as the others.
-# Then, add more key numbers below.
+# Then, press the key associated with the file's position in the list to play the file!
 audio_files = ["slow.mp3", "happy.mp3", "beats.mp3", "upbeats.mp3"]
 
 while True:
@@ -23,8 +23,7 @@ while True:
             macropad.pixels[key_event.key_number] = colorwheel(
                 int(255 / 12) * key_event.key_number
             )
-            # If adding more MP3 files, add the appropriate key numbers to the tuple below.
-            if key_event.key_number in (0, 1, 2, 3):
+            if key_event.key_number < len(audio_files):
                 macropad.play_file(audio_files[key_event.key_number])
 
         else:
