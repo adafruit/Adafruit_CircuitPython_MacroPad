@@ -155,7 +155,7 @@ class MacroPad:
         self.display.rotation = rotation
 
         # Define audio:
-        self._speaker_enable = digitalio.DigitalInOut(board.SPEAKER_SHUTDOWN)
+        self._speaker_enable = digitalio.DigitalInOut(board.SPEAKER_ENABLE)
         self._speaker_enable.switch_to_output(value=False)
         self._sample = None
         self._sine_wave = None
