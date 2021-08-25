@@ -925,7 +925,7 @@ class _PixelMapLite:
     def __setitem__(self, index, val):
         if isinstance(index, slice):
             for val_i, in_i in enumerate(range(*index.indices(self._num_pixels))):
-                self._pixels[in_i] = self._order[val_i]
+                self._pixels[self._order[in_i]] = val[val_i]
         else:
             self._pixels[self._order[index]] = val
 
