@@ -22,7 +22,7 @@ title = label.Label(
     text="      KEYPRESSES      ",
     background_color=0xFFFFFF,
 )
-layout = GridLayout(x=0, y=10, width=128, height=54, grid_size=(3, 4), cell_padding=5)
+layout = GridLayout(x=0, y=10, width=128, height=54, grid_size=(3, 4), cell_padding=1)
 labels = []
 for _ in range(12):
     labels.append(label.Label(terminalio.FONT, text=""))
