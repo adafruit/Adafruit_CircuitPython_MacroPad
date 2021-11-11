@@ -10,3 +10,4 @@ adafruit-circuitpython-neopixel
 adafruit-circuitpython-display-text
 adafruit-circuitpython-simple-text-display
 adafruit-circuitpython-debouncer
+sphinx>=4.0.0
