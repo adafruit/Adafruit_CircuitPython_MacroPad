@@ -888,18 +888,20 @@ class MacroPad:
             with audiopwmio.PWMAudioOut(
                 board.SPEAKER
             ) as audio:  # pylint: disable=not-callable
-                wavefile = audiocore.WaveFile(open(file_name, "rb"))
-                audio.play(wavefile)
-                while audio.playing:
-                    pass
+                with open(file_name, "rb") as audio_file:
+                    wavefile = audiocore.WaveFile(audio_file)
+                    audio.play(wavefile)
+                    while audio.playing:
+                        pass
         elif file_name.lower().endswith(".mp3"):
             with audiopwmio.PWMAudioOut(
                 board.SPEAKER
             ) as audio:  # pylint: disable=not-callable
-                mp3file = audiomp3.MP3Decoder(open(file_name, "rb"))
-                audio.play(mp3file)
-                while audio.playing:
-                    pass
+                with open(file_name, "rb") as audio_file:
+                    mp3file = audiomp3.MP3Decoder(audio_file)
+                    audio.play(mp3file)
+                    while audio.playing:
+                        pass
         else:
             raise ValueError("Filetype must be wav or MP3.")
         self._speaker_enable.value = False
