@@ -18,14 +18,14 @@ while True:
 
     if key_event:
         if key_event.pressed:
-            if key_event.key_number is 0:
+            if key_event.key_number == 0:
                 macropad.keyboard.send(macropad.Keycode.A)
-            if key_event.key_number is 1:
+            if key_event.key_number == 1:
                 macropad.keyboard.press(macropad.Keycode.SHIFT, macropad.Keycode.B)
                 macropad.keyboard.release_all()
-            if key_event.key_number is 2:
+            if key_event.key_number == 2:
                 macropad.keyboard_layout.write("Hello, World!")
-            if key_event.key_number is 3:
+            if key_event.key_number == 3:
                 macropad.consumer_control.send(
                     macropad.ConsumerControlCode.VOLUME_DECREMENT
                 )
