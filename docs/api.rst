@@ -8,7 +8,10 @@
     :members:
 
 .. autoattribute:: MacroPad.Keycode
+    :noindex:
 
 .. autoattribute:: MacroPad.ConsumerControlCode
+    :noindex:
 
 .. autoattribute:: MacroPad.Mouse
+    :noindex:
