@@ -89,6 +89,77 @@ ROTATED_KEYMAP_90 = (2, 5, 8, 11, 1, 4, 7, 10, 0, 3, 6, 9)
 ROTATED_KEYMAP_180 = (11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
 ROTATED_KEYMAP_270 = (9, 6, 3, 0, 10, 7, 4, 1, 11, 8, 5, 2)
 
+
+class _PixelMapLite:
+    """Generate a pixel map based on a specified order. Designed to work with a set of 12 pixels,
+    e.g. the MacroPad keypad LEDs.
+
+    :param pixels: The pixel object.
+    :param tuple order: The specified order of the pixels. Pixels are numbered 0-11. Defaults to
+                        numerical order, ``0`` to ``11``.
+    """
+
+    def __init__(
+        self,
+        pixels: NeoPixel,
+        order: Tuple[
+            int, int, int, int, int, int, int, int, int, int, int, int
+        ] = ROTATED_KEYMAP_0,
+    ):
+        self._pixels = pixels
+        self._order = order
+        self._num_pixels = len(pixels)
+        self.fill = pixels.fill
+        self.show = pixels.show
+        self.n = self._num_pixels
+
+    def __setitem__(self, index: int, val: int) -> None:
+        if isinstance(index, slice):
+            for val_i, in_i in enumerate(range(*index.indices(self._num_pixels))):
+                self._pixels[self._order[in_i]] = val[val_i]
+        else:
+            self._pixels[self._order[index]] = val
+
+    def __getitem__(self, index: int) -> int:
+        if isinstance(index, slice):
+            return [
+                self._pixels[self._order[idx]]
+                for idx in range(*index.indices(self._num_pixels))
+            ]
+        if index < 0:
+            index += self._num_pixels
+        if index >= self._num_pixels or index < 0:
+            raise IndexError
+        return self._pixels[self._order[index]]
+
+    def __repr__(self) -> str:
+        return self._pixels.__repr__()
+
+    def __len__(self) -> int:
+        return len(self._pixels)
+
+    @property
+    def auto_write(self) -> bool:
+        """
+        True if the neopixels should immediately change when set. If False, ``show`` must be
+        called explicitly.
+        """
+        return self._pixels.auto_write
+
+    @auto_write.setter
+    def auto_write(self, value: bool) -> None:
+        self._pixels.auto_write = value
+
+    @property
+    def brightness(self) -> float:
+        """Overall brightness of the pixel (0 to 1.0)."""
+        return self._pixels.brightness
+
+    @brightness.setter
+    def brightness(self, value: float) -> None:
+        self._pixels.brightness = value
+
+
 # pylint: disable=too-many-lines
 class MacroPad:
     """
@@ -933,73 +1004,3 @@ class MacroPad:
         else:
             raise ValueError("Filetype must be wav or MP3.")
         self._speaker_enable.value = False
-
-
-class _PixelMapLite:
-    """Generate a pixel map based on a specified order. Designed to work with a set of 12 pixels,
-    e.g. the MacroPad keypad LEDs.
-
-    :param pixels: The pixel object.
-    :param tuple order: The specified order of the pixels. Pixels are numbered 0-11. Defaults to
-                        numerical order, ``0`` to ``11``.
-    """
-
-    def __init__(
-        self,
-        pixels: NeoPixel,
-        order: Tuple[
-            int, int, int, int, int, int, int, int, int, int, int, int
-        ] = ROTATED_KEYMAP_0,
-    ):
-        self._pixels = pixels
-        self._order = order
-        self._num_pixels = len(pixels)
-        self.fill = pixels.fill
-        self.show = pixels.show
-        self.n = self._num_pixels
-
-    def __setitem__(self, index: int, val: int) -> None:
-        if isinstance(index, slice):
-            for val_i, in_i in enumerate(range(*index.indices(self._num_pixels))):
-                self._pixels[self._order[in_i]] = val[val_i]
-        else:
-            self._pixels[self._order[index]] = val
-
-    def __getitem__(self, index: int) -> int:
-        if isinstance(index, slice):
-            return [
-                self._pixels[self._order[idx]]
-                for idx in range(*index.indices(self._num_pixels))
-            ]
-        if index < 0:
-            index += self._num_pixels
-        if index >= self._num_pixels or index < 0:
-            raise IndexError
-        return self._pixels[self._order[index]]
-
-    def __repr__(self) -> str:
-        return self._pixels.__repr__()
-
-    def __len__(self) -> int:
-        return len(self._pixels)
-
-    @property
-    def auto_write(self) -> bool:
-        """
-        True if the neopixels should immediately change when set. If False, ``show`` must be
-        called explicitly.
-        """
-        return self._pixels.auto_write
-
-    @auto_write.setter
-    def auto_write(self, value: bool) -> None:
-        self._pixels.auto_write = value
-
-    @property
-    def brightness(self) -> float:
-        """Overall brightness of the pixel (0 to 1.0)."""
-        return self._pixels.brightness
-
-    @brightness.setter
-    def brightness(self, value: float) -> None:
-        self._pixels.brightness = value
