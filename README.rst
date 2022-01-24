@@ -3,7 +3,7 @@ Introduction
 
 
 .. image:: https://readthedocs.org/projects/adafruit-circuitpython-macropad/badge/?version=latest
-    :target: https://circuitpython.readthedocs.io/projects/macropad/en/latest/
+    :target: https://docs.circuitpython.org/projects/macropad/en/latest/
     :alt: Documentation Status
 
 
@@ -106,7 +106,7 @@ state of the rotary encoder switch.
 Documentation
 =============
 
-API documentation for this library can be found on `Read the Docs <https://circuitpython.readthedocs.io/projects/macropad/en/latest/>`_.
+API documentation for this library can be found on `Read the Docs <https://docs.circuitpython.org/projects/macropad/en/latest/>`_.
 
 Contributing
 ============
