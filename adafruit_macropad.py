@@ -238,8 +238,9 @@ class MacroPad:
         self._debounced_switch = Debouncer(self._encoder_switch)
 
         # Define display:
-        self.display = board.DISPLAY
-        self.display.rotation = rotation
+        if not isinstance(board.DISPLAY, type(None)):
+            self.display = board.DISPLAY
+            self.display.rotation = rotation
 
         # Define audio:
         self._speaker_enable = digitalio.DigitalInOut(board.SPEAKER_ENABLE)
