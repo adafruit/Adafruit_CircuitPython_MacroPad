@@ -72,11 +72,95 @@ from adafruit_midi.program_change import ProgramChange
 from adafruit_simple_text_display import SimpleTextDisplay
 from adafruit_debouncer import Debouncer
 
+try:
+    # Only used for typing
+    from typing import Tuple, Optional, Union, Iterator
+    from neopixel import NeoPixel
+    from keypad import Keys
+    import adafruit_hid
+except ImportError:
+    pass
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_MacroPad.git"
 
+ROTATED_KEYMAP_0 = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+ROTATED_KEYMAP_90 = (2, 5, 8, 11, 1, 4, 7, 10, 0, 3, 6, 9)
+ROTATED_KEYMAP_180 = (11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+ROTATED_KEYMAP_270 = (9, 6, 3, 0, 10, 7, 4, 1, 11, 8, 5, 2)
 
+
+class _PixelMapLite:
+    """Generate a pixel map based on a specified order. Designed to work with a set of 12 pixels,
+    e.g. the MacroPad keypad LEDs.
+
+    :param pixels: The pixel object.
+    :param tuple order: The specified order of the pixels. Pixels are numbered 0-11. Defaults to
+                        numerical order, ``0`` to ``11``.
+    """
+
+    def __init__(
+        self,
+        pixels: NeoPixel,
+        order: Tuple[
+            int, int, int, int, int, int, int, int, int, int, int, int
+        ] = ROTATED_KEYMAP_0,
+    ):
+        self._pixels = pixels
+        self._order = order
+        self._num_pixels = len(pixels)
+        self.fill = pixels.fill
+        self.show = pixels.show
+        self.n = self._num_pixels
+
+    def __setitem__(self, index: int, val: int) -> None:
+        if isinstance(index, slice):
+            for val_i, in_i in enumerate(range(*index.indices(self._num_pixels))):
+                self._pixels[self._order[in_i]] = val[val_i]
+        else:
+            self._pixels[self._order[index]] = val
+
+    def __getitem__(self, index: int) -> int:
+        if isinstance(index, slice):
+            return [
+                self._pixels[self._order[idx]]
+                for idx in range(*index.indices(self._num_pixels))
+            ]
+        if index < 0:
+            index += self._num_pixels
+        if index >= self._num_pixels or index < 0:
+            raise IndexError
+        return self._pixels[self._order[index]]
+
+    def __repr__(self) -> str:
+        return self._pixels.__repr__()
+
+    def __len__(self) -> int:
+        return len(self._pixels)
+
+    @property
+    def auto_write(self) -> bool:
+        """
+        True if the neopixels should immediately change when set. If False, ``show`` must be
+        called explicitly.
+        """
+        return self._pixels.auto_write
+
+    @auto_write.setter
+    def auto_write(self, value: bool) -> None:
+        self._pixels.auto_write = value
+
+    @property
+    def brightness(self) -> float:
+        """Overall brightness of the pixel (0 to 1.0)."""
+        return self._pixels.brightness
+
+    @brightness.setter
+    def brightness(self, value: float) -> None:
+        self._pixels.brightness = value
+
+
+# pylint: disable=too-many-lines
 class MacroPad:
     """
     Class representing a single MacroPad.
@@ -106,7 +190,10 @@ class MacroPad:
     """
 
     # pylint: disable=invalid-name, too-many-instance-attributes, too-many-public-methods
-    def __init__(self, rotation=0, midi_in_channel=1, midi_out_channel=1):
+    def __init__(
+        self, rotation: int = 0, midi_in_channel: int = 1, midi_out_channel: int = 1
+    ):
+
         if rotation not in (0, 90, 180, 270):
             raise ValueError("Only 90 degree rotations are supported.")
 
@@ -119,27 +206,27 @@ class MacroPad:
         self._rotated_pixels = None
         self._key_pins = None
 
-        def _keys_and_pixels(order=None):
+        def _keys_and_pixels(
+            order: Tuple[int, int, int, int, int, int, int, int, int, int, int, int]
+        ) -> None:
             """
             Generate key and pixel maps based on a specified order.
-            :param order: The order of the keys and pixels.
+            :param order: Tuple containing the order of the keys and pixels.
             """
-            if not order:
-                order = list(range(12))
             self._key_pins = [getattr(board, "KEY%d" % (num + 1)) for num in order]
             self._rotated_pixels = _PixelMapLite(self._pixels, order=order)
 
         if rotation == 0:
-            _keys_and_pixels()
+            _keys_and_pixels(order=ROTATED_KEYMAP_0)
 
         if rotation == 90:
-            _keys_and_pixels(order=(2, 5, 8, 11, 1, 4, 7, 10, 0, 3, 6, 9))
+            _keys_and_pixels(order=ROTATED_KEYMAP_90)
 
         if rotation == 180:
-            _keys_and_pixels(order=(11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0))
+            _keys_and_pixels(order=ROTATED_KEYMAP_180)
 
         if rotation == 270:
-            _keys_and_pixels(order=(9, 6, 3, 0, 10, 7, 4, 1, 11, 8, 5, 2))
+            _keys_and_pixels(order=ROTATED_KEYMAP_270)
 
         # Define keys:
         self._keys = keypad.Keys(self._key_pins, value_when_pressed=False, pull=True)
@@ -151,8 +238,9 @@ class MacroPad:
         self._debounced_switch = Debouncer(self._encoder_switch)
 
         # Define display:
-        self.display = board.DISPLAY
-        self.display.rotation = rotation
+        if not isinstance(board.DISPLAY, type(None)):
+            self.display = board.DISPLAY
+            self.display.rotation = rotation
 
         # Define audio:
         self._speaker_enable = digitalio.DigitalInOut(board.SPEAKER_ENABLE)
@@ -207,7 +295,7 @@ class MacroPad:
     """
 
     @property
-    def pixels(self):
+    def pixels(self) -> Optional[_PixelMapLite]:
         """Sequence-like object representing the twelve NeoPixel LEDs in a 3 x 4 grid on the
         MacroPad. Each pixel is at a certain index in the sequence, numbered 0-11. Colors can be an
         RGB tuple like (255, 0, 0) where (R, G, B), or an RGB hex value like 0xFF0000 for red where
@@ -245,7 +333,7 @@ class MacroPad:
         return self._rotated_pixels
 
     @property
-    def red_led(self):
+    def red_led(self) -> bool:
         """The red led next to the USB port.
 
         The following example blinks the red LED every 0.5 seconds.
@@ -266,11 +354,11 @@ class MacroPad:
         return self._led.value
 
     @red_led.setter
-    def red_led(self, value):
+    def red_led(self, value: bool) -> None:
         self._led.value = value
 
     @property
-    def keys(self):
+    def keys(self) -> Keys:
         """
         The keys on the MacroPad. Uses events to track key number and state, e.g. pressed or
         released. You must fetch the events using ``keys.events.get()`` and then the events are
@@ -299,7 +387,7 @@ class MacroPad:
         return self._keys
 
     @property
-    def encoder(self):
+    def encoder(self) -> int:
         """
         The rotary encoder relative rotation position. Always begins at 0 when the code is run, so
         the value returned is relative to the initial location.
@@ -318,7 +406,7 @@ class MacroPad:
         return self._encoder.position * -1
 
     @property
-    def encoder_switch(self):
+    def encoder_switch(self) -> bool:
         """
         The rotary encoder switch. Returns ``True`` when pressed.
 
@@ -336,7 +424,7 @@ class MacroPad:
         return not self._encoder_switch.value
 
     @property
-    def encoder_switch_debounced(self):
+    def encoder_switch_debounced(self) -> Debouncer:
         """
         The rotary encoder switch debounced. Allows for ``encoder_switch_debounced.pressed`` and
         ``encoder_switch_debounced.released``. Requires you to include
@@ -363,7 +451,7 @@ class MacroPad:
         return self._debounced_switch
 
     @property
-    def keyboard(self):
+    def keyboard(self) -> adafruit_hid.keyboard.Keyboard:
         """
         A keyboard object used to send HID reports. For details, see the ``Keyboard`` documentation
         in CircuitPython HID: https://circuitpython.readthedocs.io/projects/hid/en/latest/index.html
@@ -385,7 +473,7 @@ class MacroPad:
         return self._keyboard
 
     @property
-    def keyboard_layout(self):
+    def keyboard_layout(self) -> adafruit_hid.keyboard_layout_base.KeyboardLayoutBase:
         """
         Map ASCII characters to the appropriate key presses on a standard US PC keyboard.
         Non-ASCII characters and most control characters will raise an exception. Required to send
@@ -410,7 +498,7 @@ class MacroPad:
         return self._keyboard_layout
 
     @property
-    def consumer_control(self):
+    def consumer_control(self) -> adafruit_hid.consumer_control.ConsumerControl:
         """
         Send ConsumerControl code reports, used by multimedia keyboards, remote controls, etc.
 
@@ -431,7 +519,7 @@ class MacroPad:
         return self._consumer_control
 
     @property
-    def mouse(self):
+    def mouse(self) -> adafruit_hid.mouse.Mouse:
         """
         Send USB HID mouse reports.
 
@@ -453,7 +541,7 @@ class MacroPad:
         return self._mouse
 
     @property
-    def midi(self):
+    def midi(self) -> adafruit_midi.MIDI:
         """
         The MIDI object. Used to send and receive MIDI messages. For more details, see the
         ``adafruit_midi`` documentation in CircuitPython MIDI:
@@ -491,7 +579,9 @@ class MacroPad:
         return self._midi
 
     @staticmethod
-    def NoteOn(note, velocity=127, *, channel=None):
+    def NoteOn(
+        note: Union[int, str], velocity: int = 127, *, channel: Optional[int] = None
+    ) -> NoteOn:
         """
         Note On Change MIDI message. For more details, see the ``adafruit_midi.note_on``
         documentation in CircuitPython MIDI:
@@ -541,7 +631,9 @@ class MacroPad:
         return NoteOn(note=note, velocity=velocity, channel=channel)
 
     @staticmethod
-    def NoteOff(note, velocity=127, *, channel=None):
+    def NoteOff(
+        note: Union[int, str], velocity: int = 127, *, channel: Optional[int] = None
+    ) -> NoteOff:
         """
         Note Off Change MIDI message. For more details, see the ``adafruit_midi.note_off``
         documentation in CircuitPython MIDI:
@@ -571,7 +663,7 @@ class MacroPad:
         return NoteOff(note=note, velocity=velocity, channel=channel)
 
     @staticmethod
-    def PitchBend(pitch_bend, *, channel=None):
+    def PitchBend(pitch_bend: int, *, channel: Optional[int] = None) -> PitchBend:
         """
         Pitch Bend Change MIDI message. For more details, see the ``adafruit_midi.pitch_bend``
         documentation in CircuitPython MIDI:
@@ -612,7 +704,9 @@ class MacroPad:
         return PitchBend(pitch_bend=pitch_bend, channel=channel)
 
     @staticmethod
-    def ControlChange(control, value, *, channel=None):
+    def ControlChange(
+        control: int, value: int, *, channel: Optional[int] = None
+    ) -> ControlChange:
         """
         Control Change MIDI message. For more details, see the ``adafruit_midi.control_change``
         documentation in CircuitPython MIDI:
@@ -655,7 +749,7 @@ class MacroPad:
         return ControlChange(control=control, value=value, channel=channel)
 
     @staticmethod
-    def ProgramChange(patch, *, channel=None):
+    def ProgramChange(patch: int, *, channel: Optional[int] = None) -> ProgramChange:
         """
         Program Change MIDI message. For more details, see the ``adafruit_midi.program_change``
         documentation in CircuitPython MIDI:
@@ -683,7 +777,11 @@ class MacroPad:
         """
         return ProgramChange(patch=patch, channel=channel)
 
-    def display_image(self, file_name=None, position=None):
+    def display_image(
+        self,
+        file_name: Optional[str] = None,
+        position: Optional[Tuple[int, int]] = None,
+    ) -> None:
         """
         Display an image on the built-in display.
 
@@ -724,8 +822,12 @@ class MacroPad:
 
     @staticmethod
     def display_text(
-        title=None, title_scale=1, title_length=80, text_scale=1, font=None
-    ):
+        title: Optional[str] = None,
+        title_scale: int = 1,
+        title_length: int = 80,
+        text_scale: int = 1,
+        font: Optional[str] = None,
+    ) -> SimpleTextDisplay:
         """
         Display lines of text on the built-in display. Note that if you instantiate this without
         a title, it will display the first (``[0]``) line of text at the top of the display - use
@@ -776,20 +878,20 @@ class MacroPad:
         )
 
     @staticmethod
-    def _sine_sample(length):
+    def _sine_sample(length: int) -> Iterator[int]:
         tone_volume = (2 ** 15) - 1
         shift = 2 ** 15
         for i in range(length):
             yield int(tone_volume * math.sin(2 * math.pi * (i / length)) + shift)
 
-    def _generate_sample(self, length=100):
+    def _generate_sample(self, length: int = 100) -> None:
         if self._sample is not None:
             return
         self._sine_wave = array.array("H", self._sine_sample(length))
         self._sample = audiopwmio.PWMAudioOut(board.SPEAKER)
         self._sine_wave_sample = audiocore.RawSample(self._sine_wave)
 
-    def play_tone(self, frequency, duration):
+    def play_tone(self, frequency: int, duration: float) -> None:
         """Produce a tone using the speaker at a specified hz for a specified duration in seconds.
 
         :param int frequency: The frequency of the tone in Hz
@@ -812,7 +914,7 @@ class MacroPad:
         time.sleep(duration)
         self.stop_tone()
 
-    def start_tone(self, frequency):
+    def start_tone(self, frequency: int) -> None:
         """Produce a tone using the speaker. Will continue playing until ``stop_tone`` is called.
 
         :param int frequency: The frequency of the tone in Hz
@@ -841,7 +943,7 @@ class MacroPad:
         if not self._sample.playing:
             self._sample.play(self._sine_wave_sample, loop=True)
 
-    def stop_tone(self):
+    def stop_tone(self) -> None:
         """Use with ``start_tone`` to stop the tone produced. See usage example in ``start_tone``
         documentation."""
         # Stop playing any tones.
@@ -851,7 +953,7 @@ class MacroPad:
             self._sample = None
         self._speaker_enable.value = False
 
-    def play_file(self, file_name):
+    def play_file(self, file_name: str) -> None:
         """Play a .wav or .mp3 file using the onboard speaker.
 
         :param file_name: The name of your .wav or .mp3 file in quotation marks including
@@ -903,67 +1005,3 @@ class MacroPad:
         else:
             raise ValueError("Filetype must be wav or MP3.")
         self._speaker_enable.value = False
-
-
-class _PixelMapLite:
-    """Generate a pixel map based on a specified order. Designed to work with a set of 12 pixels,
-    e.g. the MacroPad keypad LEDs.
-
-    :param pixels: The pixel object.
-    :param tuple order: The specified order of the pixels. Pixels are numbered 0-11. Defaults to
-                        numerical order, ``0`` to ``11``.
-    """
-
-    def __init__(self, pixels, order=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)):
-        self._pixels = pixels
-        self._order = order
-        self._num_pixels = len(pixels)
-        self.fill = pixels.fill
-        self.show = pixels.show
-        self.n = self._num_pixels
-
-    def __setitem__(self, index, val):
-        if isinstance(index, slice):
-            for val_i, in_i in enumerate(range(*index.indices(self._num_pixels))):
-                self._pixels[self._order[in_i]] = val[val_i]
-        else:
-            self._pixels[self._order[index]] = val
-
-    def __getitem__(self, index):
-        if isinstance(index, slice):
-            return [
-                self._pixels[self._order[idx]]
-                for idx in range(*index.indices(self._num_pixels))
-            ]
-        if index < 0:
-            index += self._num_pixels
-        if index >= self._num_pixels or index < 0:
-            raise IndexError
-        return self._pixels[self._order[index]]
-
-    def __repr__(self):
-        return self._pixels.__repr__()
-
-    def __len__(self):
-        return len(self._pixels)
-
-    @property
-    def auto_write(self):
-        """
-        True if the neopixels should immediately change when set. If False, ``show`` must be
-        called explicitly.
-        """
-        return self._pixels.auto_write
-
-    @auto_write.setter
-    def auto_write(self, value):
-        self._pixels.auto_write = value
-
-    @property
-    def brightness(self):
-        """Overall brightness of the pixel (0 to 1.0)."""
-        return self._pixels.brightness
-
-    @brightness.setter
-    def brightness(self, value):
-        self._pixels.brightness = value
