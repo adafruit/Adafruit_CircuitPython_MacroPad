@@ -256,13 +256,16 @@ class MacroPad:
         self._mouse = None
 
         # Define MIDI:
-        self._midi = adafruit_midi.MIDI(
-            midi_in=usb_midi.ports[0],
-            # MIDI uses channels 1-16. CircuitPython uses 0-15. Ergo -1.
-            in_channel=midi_in_channel - 1,
-            midi_out=usb_midi.ports[1],
-            out_channel=midi_out_channel - 1,
-        )
+        if len(usb_midi.ports) == 2:
+            self._midi = adafruit_midi.MIDI(
+                midi_in=usb_midi.ports[0],
+                # MIDI uses channels 1-16. CircuitPython uses 0-15. Ergo -1.
+                in_channel=midi_in_channel - 1,
+                midi_out=usb_midi.ports[1],
+                out_channel=midi_out_channel - 1,
+            )
+        else:
+            self._midi = None
 
     Keycode = Keycode
     """
