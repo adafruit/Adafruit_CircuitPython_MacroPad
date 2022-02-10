@@ -108,7 +108,7 @@ Documentation
 
 API documentation for this library can be found on `Read the Docs <https://docs.circuitpython.org/projects/macropad/en/latest/>`_.
 
-For information on building library documentation, please check out
+For information on building library documentation, please check out `this guide <https://learn.adafruit.com/creating-and-sharing-a-circuitpython-library/sharing-our-docs-on-readthedocs#sphinx-5-1>`_.
 
 Contributing
 ============
