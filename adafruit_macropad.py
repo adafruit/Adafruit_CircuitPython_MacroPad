@@ -40,7 +40,7 @@ Implementation Notes
 
 * Adafruit's CircuitPython Debouncer library:
   https://github.com/adafruit/Adafruit_CircuitPython_Debouncer
-  
+
 * Adafruit's CircuitPython Ticks library
   https://github.com/adafruit/Adafruit_CircuitPython_Ticks
 
