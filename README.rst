@@ -48,6 +48,10 @@ This driver depends on:
 * `Adafruit's CircuitPython Debouncer library
   <https://github.com/adafruit/Adafruit_CircuitPython_Debouncer>`_
 
+* `Adafruit's CircuitPython Ticks library
+  <https://github.com/adafruit/Adafruit_CircuitPython_Ticks>`_
+
+
 Please ensure all dependencies are available on the CircuitPython filesystem.
 This is easily achieved by downloading
 `the Adafruit library and driver bundle <https://circuitpython.org/libraries>`_
