@@ -60,8 +60,9 @@ import audiocore
 import audiomp3
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
-from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_base import KeyboardLayoutBase
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+from adafruit_hid.keycode import Keycode
 from adafruit_hid.consumer_control import ConsumerControl
 from adafruit_hid.consumer_control_code import ConsumerControlCode
 from adafruit_hid.mouse import Mouse
@@ -80,7 +81,7 @@ try:
     from typing import Tuple, Optional, Union, Iterator
     from neopixel import NeoPixel
     from keypad import Keys
-    import adafruit_hid
+    import adafruit_hid  # pylint:disable=ungrouped-imports
 except ImportError:
     pass
 
@@ -91,6 +92,10 @@ ROTATED_KEYMAP_0 = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
 ROTATED_KEYMAP_90 = (2, 5, 8, 11, 1, 4, 7, 10, 0, 3, 6, 9)
 ROTATED_KEYMAP_180 = (11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
 ROTATED_KEYMAP_270 = (9, 6, 3, 0, 10, 7, 4, 1, 11, 8, 5, 2)
+
+
+keycodes = Keycode
+"""Module level Keycode class, to be changed when initing Macropad with a different language"""
 
 
 class _PixelMapLite:
@@ -163,7 +168,7 @@ class _PixelMapLite:
         self._pixels.brightness = value
 
 
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines, disable=invalid-name, too-many-instance-attributes, too-many-public-methods, too-many-arguments
 class MacroPad:
     """
     Class representing a single MacroPad.
@@ -182,6 +187,14 @@ class MacroPad:
                                          channels. Defaults to 1.
     :param int midi_out_channel: The MIDI output channel. Defaults to 1.
 
+    :param type[KeyboardLayoutBase] layout_class: Class for the keyboard layout, to setup an
+                                                  international or alternative keyboard. Defaults
+                                                  to KeyboardLayoutUS from adafruit_hid.
+    :param type[Keycode] keycode_class: Class used for the keycode names provided by
+                                        adafruit_macropad.Keycode. Defaults to the standard Keycode
+                                        from adafruit_hid.
+
+
     The following shows how to initialise the MacroPad library with the board rotated 90 degrees,
     and the MIDI channels both set to 1.
 
@@ -192,9 +205,43 @@ class MacroPad:
         macropad = MacroPad(rotation=90, midi_in_channel=1, midi_out_channel=1)
     """
 
-    # pylint: disable=invalid-name, too-many-instance-attributes, too-many-public-methods
+    Keycode = Keycode
+    """
+    The contents of the Keycode module are available as a property of MacroPad. This includes all
+    keycode constants available within the Keycode module, which includes all the keys on a
+    regular PC or Mac keyboard.
+
+    Remember that keycodes are the names for key _positions_ on a US keyboard, and may not
+    correspond to the character that you mean to send if you want to emulate non-US keyboard.
+
+    For usage example, see the ``keyboard`` documentation in this library.
+    """
+
+    ConsumerControlCode = ConsumerControlCode
+    """
+    The contents of the ConsumerControlCode module are available as a property of MacroPad.
+    This includes the available USB HID Consumer Control Device constants. This list is not
+    exhaustive.
+
+    For usage example, see the ``consumer_control`` documentation in this library.
+    """
+
+    Mouse = Mouse
+    """
+    The contents of the Mouse module are available as a property of MacroPad. This includes the
+    ``LEFT_BUTTON``, ``MIDDLE_BUTTON``, and ``RIGHT_BUTTON`` constants. The rest of the
+    functionality of the ``Mouse`` module should be used through ``macropad.mouse``.
+
+    For usage example, see the ``mouse`` documentation in this library.
+    """
+
     def __init__(
-        self, rotation: int = 0, midi_in_channel: int = 1, midi_out_channel: int = 1
+        self,
+        rotation: int = 0,
+        midi_in_channel: int = 1,
+        midi_out_channel: int = 1,
+        layout_class: type[KeyboardLayoutBase] = KeyboardLayoutUS,
+        keycode_class: type[Keycode] = Keycode,
     ):
 
         if rotation not in (0, 90, 180, 270):
@@ -257,6 +304,12 @@ class MacroPad:
         self._keyboard_layout = None
         self._consumer_control = None
         self._mouse = None
+        self._layout_class = layout_class
+        self.Keycode = keycode_class
+        # pylint:disable=global-statement
+        global keycodes
+        keycodes = keycode_class
+        # pylint:enable=global-statement
 
         # Define MIDI:
         try:
@@ -270,36 +323,6 @@ class MacroPad:
         except IndexError:
             # No MIDI ports available.
             self._midi = None
-
-    Keycode = Keycode
-    """
-    The contents of the Keycode module are available as a property of MacroPad. This includes all
-    keycode constants available within the Keycode module, which includes all the keys on a
-    regular PC or Mac keyboard.
-
-    Remember that keycodes are the names for key _positions_ on a US keyboard, and may not
-    correspond to the character that you mean to send if you want to emulate non-US keyboard.
-
-    For usage example, see the ``keyboard`` documentation in this library.
-    """
-
-    ConsumerControlCode = ConsumerControlCode
-    """
-    The contents of the ConsumerControlCode module are available as a property of MacroPad.
-    This includes the available USB HID Consumer Control Device constants. This list is not
-    exhaustive.
-
-    For usage example, see the ``consumer_control`` documentation in this library.
-    """
-
-    Mouse = Mouse
-    """
-    The contents of the Mouse module are available as a property of MacroPad. This includes the
-    ``LEFT_BUTTON``, ``MIDDLE_BUTTON``, and ``RIGHT_BUTTON`` constants. The rest of the
-    functionality of the ``Mouse`` module should be used through ``macropad.mouse``.
-
-    For usage example, see the ``mouse`` documentation in this library.
-    """
 
     @property
     def pixels(self) -> Optional[_PixelMapLite]:
@@ -501,7 +524,7 @@ class MacroPad:
         """
         if self._keyboard_layout is None:
             # This will need to be updated if we add more layouts. Currently there is only US.
-            self._keyboard_layout = KeyboardLayoutUS(self.keyboard)
+            self._keyboard_layout = self._layout_class(self.keyboard)
         return self._keyboard_layout
 
     @property
