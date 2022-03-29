@@ -909,8 +909,8 @@ class MacroPad:
 
     @staticmethod
     def _sine_sample(length: int) -> Iterator[int]:
-        tone_volume = (2 ** 15) - 1
-        shift = 2 ** 15
+        tone_volume = (2**15) - 1
+        shift = 2**15
         for i in range(length):
             yield int(tone_volume * math.sin(2 * math.pi * (i / length)) + shift)
 
