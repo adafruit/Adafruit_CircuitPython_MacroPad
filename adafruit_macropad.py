@@ -397,8 +397,9 @@ class MacroPad:
         * ``key_number``: the number of the key that changed. Keys are numbered starting at 0.
         * ``pressed``: ``True`` if the event is a transition from released to pressed.
         * ``released``: ``True`` if the event is a transition from pressed to released.
-            ``released`` is always the opposite of ``pressed``; it's provided for convenience
-            and clarity, in case you want to test for key-release events explicitly.
+
+        ``released`` is always the opposite of ``pressed``; it's provided for convenience
+        and clarity, in case you want to test for key-release events explicitly.
 
         The following example prints the key press and release events to the serial console.
 
