@@ -243,7 +243,6 @@ class MacroPad:
         layout_class: type[KeyboardLayoutBase] = KeyboardLayoutUS,
         keycode_class: type[Keycode] = Keycode,
     ):
-
         if rotation not in (0, 90, 180, 270):
             raise ValueError("Only 90 degree rotations are supported.")
 
@@ -291,6 +290,7 @@ class MacroPad:
         if not isinstance(board.DISPLAY, type(None)):
             self.display = board.DISPLAY
             self.display.rotation = rotation
+        self._display_sleep = False
 
         # Define audio:
         self._speaker_enable = digitalio.DigitalInOut(board.SPEAKER_ENABLE)
@@ -323,6 +323,30 @@ class MacroPad:
         except IndexError:
             # No MIDI ports available.
             self._midi = None
+
+    @property
+    def display_sleep(self) -> bool:
+        """The power saver mode of the display. Set it to put the display to
+        sleep or wake it up again.
+
+        If the display is put to sleep, it stops the OLED drive and greatly
+        reduces its power usage. The display mode and current content of the
+        display are still kept in the memory of the displays microprocessor and
+        can be updated nevertheless.
+        """
+        return self._display_sleep
+
+    @display_sleep.setter
+    def display_sleep(self, sleep: bool) -> None:
+        if self._display_sleep == sleep:
+            return
+        # See https://cdn-shop.adafruit.com/product-files/5228/5223-ds.pdf#page=13
+        if sleep:
+            command = 0xAE
+        else:
+            command = 0xAF
+        self.display.bus.send(command, b"")
+        self._display_sleep = sleep
 
     @property
     def pixels(self) -> Optional[_PixelMapLite]:
