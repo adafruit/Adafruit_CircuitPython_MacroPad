@@ -93,6 +93,9 @@ ROTATED_KEYMAP_90 = (2, 5, 8, 11, 1, 4, 7, 10, 0, 3, 6, 9)
 ROTATED_KEYMAP_180 = (11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
 ROTATED_KEYMAP_270 = (9, 6, 3, 0, 10, 7, 4, 1, 11, 8, 5, 2)
 
+# See https://cdn-shop.adafruit.com/product-files/5228/5223-ds.pdf#page=13
+_DISPLAY_SLEEP_COMMAND = 0xAE
+_DISPLAY_WAKE_COMMAND = 0xAF
 
 keycodes = Keycode
 """Module level Keycode class, to be changed when initing Macropad with a different language"""
@@ -290,6 +293,7 @@ class MacroPad:
         if not isinstance(board.DISPLAY, type(None)):
             self.display = board.DISPLAY
             self.display.rotation = rotation
+            self.display.bus.send(_DISPLAY_WAKE_COMMAND, b"")
         self._display_sleep = False
 
         # Define audio:
@@ -340,11 +344,10 @@ class MacroPad:
     def display_sleep(self, sleep: bool) -> None:
         if self._display_sleep == sleep:
             return
-        # See https://cdn-shop.adafruit.com/product-files/5228/5223-ds.pdf#page=13
         if sleep:
-            command = 0xAE
+            command = _DISPLAY_SLEEP_COMMAND
         else:
-            command = 0xAF
+            command = _DISPLAY_WAKE_COMMAND
         self.display.bus.send(command, b"")
         self._display_sleep = sleep
 
