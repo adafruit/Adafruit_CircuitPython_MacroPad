@@ -28,6 +28,7 @@ key_pressed_stack = []
 # be the index of the currently playing note.
 playing_index = None
 
+
 # Helper to convert an integer to an rgb value.
 def rgb_from_int(rgb):
     blue = rgb & 255
