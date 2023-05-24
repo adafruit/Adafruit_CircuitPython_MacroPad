@@ -4,3 +4,4 @@
 # SPDX-License-Identifier: MIT
 
 sphinx>=4.0.0
+sphinxcontrib-jquery
