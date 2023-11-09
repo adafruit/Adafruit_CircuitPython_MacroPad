@@ -899,11 +899,9 @@ class MacroPad:
                                  Defaults to 80.
         :param int text_scale: Scale the size of the data lines. Scales the title as well.
                                Defaults to 1.
-        :param ~FontProtocol|None font: The font or the path to the custom font file to use to
-                     display the text. Defaults to the built-in ``terminalio.FONT``. The ``font``
-                     argument must be of a type that subclasses ``FontProtocol``. For more details,
-                     see:
-                     https://docs.circuitpython.org/en/latest/shared-bindings/fontio/index.html
+        :param ~FontProtocol|None font: The custom font to use to display the text. Defaults to the
+                                        built-in ``terminalio.FONT``. For more details, see:
+                                        https://docs.circuitpython.org/en/latest/shared-bindings/fontio/index.html
 
         The following example displays a title and lines of text indicating which key is pressed,
         the relative position of the rotary encoder, and whether the encoder switch is pressed.
