@@ -865,7 +865,7 @@ class MacroPad:
         if not position:
             position = (0, 0)
         group = displayio.Group(scale=1)
-        self.display.show(group)
+        self.display.root_group = group
         with open(file_name, "rb") as image_file:
             background = displayio.OnDiskBitmap(image_file)
             sprite = displayio.TileGrid(
