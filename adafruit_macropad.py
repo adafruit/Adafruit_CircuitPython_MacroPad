@@ -900,8 +900,9 @@ class MacroPad:
         :param int text_scale: Scale the size of the data lines. Scales the title as well.
                                Defaults to 1.
         :param font: The font or the path to the custom font file to use to display the text.
-                     Defaults to the built-in ``terminalio.FONT``. Custom font files must be
-                     provided as a string, e.g. ``"/Arial12.bdf"``.
+                     Defaults to the built-in ``terminalio.FONT``. The ``font`` argument must be of
+                     a type that subclasses ``FontProtocol``. For more details, see:
+                     https://docs.circuitpython.org/en/latest/shared-bindings/fontio/index.html
 
         The following example displays a title and lines of text indicating which key is pressed,
         the relative position of the rotary encoder, and whether the encoder switch is pressed.
@@ -909,11 +910,14 @@ class MacroPad:
 
         .. code-block:: python
 
+            from adafruit_bitmap_font import bitmap_font
             from adafruit_macropad import MacroPad
+            from displayio import Bitmap
 
             macropad = MacroPad()
 
-            text_lines = macropad.display_text(title="MacroPad Info")
+            custom_font = bitmap_font.load_font("/Arial12.bdf", Bitmap)
+            text_lines = macropad.display_text(title="MacroPad Info", font=custom_font)
 
             while True:
                 key_event = macropad.keys.events.get()
