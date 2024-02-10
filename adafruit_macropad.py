@@ -305,15 +305,15 @@ class MacroPad:
         """
         Set the display rotation
 
-        :param int rotation: The rotational position of the MacroPad. Allows for rotating the MacroPad
-                            in 90 degree increments to four different positions and rotates the keypad
-                            layout and display orientation to match. Keypad layout is always left to
-                            right, top to bottom, beginning with key number 0 in the top left, and
-                            ending with key number 11 in the bottom right. Supports ``0``, ``90``,
-                            ``180``, and ``270`` degree rotations. ``0`` is when the USB port is at
-                            the top, ``90`` is when the USB port is to the left, ``180`` is when the
-                            USB port is at the bottom, and ``270`` is when the USB port is to the
-                            right. Defaults to ``0``.
+        :param int rotation: The rotational position of the MacroPad. Allows for rotating the
+                            MacroPad in 90 degree increments to four different positions and
+                            rotates the keypad layout and display orientation to match. Keypad
+                            layout is always left to right, top to bottom, beginning with key
+                            number 0 in the top left, and ending with key number 11 in the bottom
+                            right. Supports ``0``, ``90``, ``180``, and ``270`` degree rotations.
+                            ``0`` is when the USB port is at the top, ``90`` is when the USB port
+                            is to the left, ``180`` is when the USB port is at the bottom, and
+                            ``270`` is when the USB port is to the right. Defaults to ``0``.
         """
         if rotation not in (0, 90, 180, 270):
             raise ValueError("Only 90 degree rotations are supported.")
