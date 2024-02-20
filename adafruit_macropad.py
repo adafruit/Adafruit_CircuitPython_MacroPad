@@ -356,6 +356,10 @@ class MacroPad:
         """
         return self._rotation
 
+    @rotation.setter
+    def rotation(self, new_rotation) -> None:
+        self.rotate(new_rotation)
+
     @property
     def display_sleep(self) -> bool:
         """The power saver mode of the display. Set it to put the display to
