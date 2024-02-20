@@ -246,42 +246,10 @@ class MacroPad:
         layout_class: type[KeyboardLayoutBase] = KeyboardLayoutUS,
         keycode_class: type[Keycode] = Keycode,
     ):
-        if rotation not in (0, 90, 180, 270):
-            raise ValueError("Only 90 degree rotations are supported.")
-
         # Define LEDs:
         self._pixels = neopixel.NeoPixel(board.NEOPIXEL, 12)
         self._led = digitalio.DigitalInOut(board.LED)
         self._led.switch_to_output()
-
-        # Define key and pixel maps based on rotation:
-        self._rotated_pixels = None
-        self._key_pins = None
-
-        def _keys_and_pixels(
-            order: Tuple[int, int, int, int, int, int, int, int, int, int, int, int]
-        ) -> None:
-            """
-            Generate key and pixel maps based on a specified order.
-            :param order: Tuple containing the order of the keys and pixels.
-            """
-            self._key_pins = [getattr(board, "KEY%d" % (num + 1)) for num in order]
-            self._rotated_pixels = _PixelMapLite(self._pixels, order=order)
-
-        if rotation == 0:
-            _keys_and_pixels(order=ROTATED_KEYMAP_0)
-
-        if rotation == 90:
-            _keys_and_pixels(order=ROTATED_KEYMAP_90)
-
-        if rotation == 180:
-            _keys_and_pixels(order=ROTATED_KEYMAP_180)
-
-        if rotation == 270:
-            _keys_and_pixels(order=ROTATED_KEYMAP_270)
-
-        # Define keys:
-        self._keys = keypad.Keys(self._key_pins, value_when_pressed=False, pull=True)
 
         # Define rotary encoder and encoder switch:
         self._encoder = rotaryio.IncrementalEncoder(board.ROTA, board.ROTB)
@@ -292,9 +260,14 @@ class MacroPad:
         # Define display:
         if not isinstance(board.DISPLAY, type(None)):
             self.display = board.DISPLAY
-            self.display.rotation = rotation
             self.display.bus.send(_DISPLAY_WAKE_COMMAND, b"")
         self._display_sleep = False
+
+        # Define key and pixel maps based on rotation:
+        self._rotated_pixels = None
+        self._key_pins = None
+        self._keys = None
+        self.rotate(rotation)
 
         # Define audio:
         self._speaker_enable = digitalio.DigitalInOut(board.SPEAKER_ENABLE)
@@ -327,6 +300,65 @@ class MacroPad:
         except IndexError:
             # No MIDI ports available.
             self._midi = None
+
+    def rotate(self, rotation):
+        """
+        Set the display rotation
+
+        :param int rotation: The rotational position of the MacroPad. Allows for rotating the
+                            MacroPad in 90 degree increments to four different positions and
+                            rotates the keypad layout and display orientation to match. Keypad
+                            layout is always left to right, top to bottom, beginning with key
+                            number 0 in the top left, and ending with key number 11 in the bottom
+                            right. Supports ``0``, ``90``, ``180``, and ``270`` degree rotations.
+                            ``0`` is when the USB port is at the top, ``90`` is when the USB port
+                            is to the left, ``180`` is when the USB port is at the bottom, and
+                            ``270`` is when the USB port is to the right. Defaults to ``0``.
+        """
+        if rotation not in (0, 90, 180, 270):
+            raise ValueError("Only 90 degree rotations are supported.")
+
+        self._rotation = rotation
+
+        def _keys_and_pixels(
+            order: Tuple[int, int, int, int, int, int, int, int, int, int, int, int]
+        ) -> None:
+            """
+            Generate key and pixel maps based on a specified order.
+            :param order: Tuple containing the order of the keys and pixels.
+            """
+            self._key_pins = [getattr(board, "KEY%d" % (num + 1)) for num in order]
+            self._rotated_pixels = _PixelMapLite(self._pixels, order=order)
+
+        if rotation == 0:
+            _keys_and_pixels(order=ROTATED_KEYMAP_0)
+
+        if rotation == 90:
+            _keys_and_pixels(order=ROTATED_KEYMAP_90)
+
+        if rotation == 180:
+            _keys_and_pixels(order=ROTATED_KEYMAP_180)
+
+        if rotation == 270:
+            _keys_and_pixels(order=ROTATED_KEYMAP_270)
+
+        # Define keys:
+        if self._keys is not None:
+            self._keys.deinit()
+        self._keys = keypad.Keys(self._key_pins, value_when_pressed=False, pull=True)
+
+        self.display.rotation = rotation
+
+    @property
+    def rotation(self) -> int:
+        """
+        The current rotation
+        """
+        return self._rotation
+
+    @rotation.setter
+    def rotation(self, new_rotation) -> None:
+        self.rotate(new_rotation)
 
     @property
     def display_sleep(self) -> bool:
