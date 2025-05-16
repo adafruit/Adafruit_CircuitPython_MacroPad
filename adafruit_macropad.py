@@ -49,39 +49,41 @@ Implementation Notes
 import array
 import math
 import time
-import board
-import digitalio
-import rotaryio
-import keypad
-import neopixel
-import displayio
-import audiopwmio
+
+import adafruit_midi
 import audiocore
 import audiomp3
+import audiopwmio
+import board
+import digitalio
+import displayio
+import keypad
+import neopixel
+import rotaryio
 import usb_hid
+import usb_midi
+from adafruit_debouncer import Debouncer
+from adafruit_hid.consumer_control import ConsumerControl
+from adafruit_hid.consumer_control_code import ConsumerControlCode
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keyboard_layout_base import KeyboardLayoutBase
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 from adafruit_hid.keycode import Keycode
-from adafruit_hid.consumer_control import ConsumerControl
-from adafruit_hid.consumer_control_code import ConsumerControlCode
 from adafruit_hid.mouse import Mouse
-import usb_midi
-import adafruit_midi
-from adafruit_midi.note_on import NoteOn
-from adafruit_midi.note_off import NoteOff
-from adafruit_midi.pitch_bend import PitchBend
 from adafruit_midi.control_change import ControlChange
+from adafruit_midi.note_off import NoteOff
+from adafruit_midi.note_on import NoteOn
+from adafruit_midi.pitch_bend import PitchBend
 from adafruit_midi.program_change import ProgramChange
 from adafruit_simple_text_display import SimpleTextDisplay
-from adafruit_debouncer import Debouncer
 
 try:
     # Only used for typing
-    from typing import Tuple, Optional, Union, Iterator
-    from neopixel import NeoPixel
+    from typing import Iterator, Optional, Tuple, Union
+
+    import adafruit_hid
     from keypad import Keys
-    import adafruit_hid  # pylint:disable=ungrouped-imports
+    from neopixel import NeoPixel
 except ImportError:
     pass
 
@@ -113,9 +115,7 @@ class _PixelMapLite:
     def __init__(
         self,
         pixels: NeoPixel,
-        order: Tuple[
-            int, int, int, int, int, int, int, int, int, int, int, int
-        ] = ROTATED_KEYMAP_0,
+        order: Tuple[int, int, int, int, int, int, int, int, int, int, int, int] = ROTATED_KEYMAP_0,
     ):
         self._pixels = pixels
         self._order = order
@@ -134,8 +134,7 @@ class _PixelMapLite:
     def __getitem__(self, index: int) -> int:
         if isinstance(index, slice):
             return [
-                self._pixels[self._order[idx]]
-                for idx in range(*index.indices(self._num_pixels))
+                self._pixels[self._order[idx]] for idx in range(*index.indices(self._num_pixels))
             ]
         if index < 0:
             index += self._num_pixels
@@ -171,7 +170,6 @@ class _PixelMapLite:
         self._pixels.brightness = value
 
 
-# pylint: disable=too-many-lines, disable=invalid-name, too-many-instance-attributes, too-many-public-methods, too-many-arguments
 class MacroPad:
     """
     Class representing a single MacroPad.
@@ -283,10 +281,8 @@ class MacroPad:
         self._mouse = None
         self._layout_class = layout_class
         self.Keycode = keycode_class
-        # pylint:disable=global-statement
         global keycodes
         keycodes = keycode_class
-        # pylint:enable=global-statement
 
         # Define MIDI:
         try:
@@ -315,13 +311,13 @@ class MacroPad:
                             is to the left, ``180`` is when the USB port is at the bottom, and
                             ``270`` is when the USB port is to the right. Defaults to ``0``.
         """
-        if rotation not in (0, 90, 180, 270):
+        if rotation not in {0, 90, 180, 270}:
             raise ValueError("Only 90 degree rotations are supported.")
 
         self._rotation = rotation
 
         def _keys_and_pixels(
-            order: Tuple[int, int, int, int, int, int, int, int, int, int, int, int]
+            order: Tuple[int, int, int, int, int, int, int, int, int, int, int, int],
         ) -> None:
             """
             Generate key and pixel maps based on a specified order.
@@ -793,9 +789,7 @@ class MacroPad:
         return PitchBend(pitch_bend=pitch_bend, channel=channel)
 
     @staticmethod
-    def ControlChange(
-        control: int, value: int, *, channel: Optional[int] = None
-    ) -> ControlChange:
+    def ControlChange(control: int, value: int, *, channel: Optional[int] = None) -> ControlChange:
         """
         Control Change MIDI message. For more details, see the ``adafruit_midi.control_change``
         documentation in CircuitPython MIDI:
@@ -1081,7 +1075,7 @@ class MacroPad:
         if file_name.lower().endswith(".wav"):
             with audiopwmio.PWMAudioOut(board.SPEAKER) as audio, open(
                 file_name, "rb"
-            ) as audio_file:  # pylint: disable=not-callable
+            ) as audio_file:
                 wavefile = audiocore.WaveFile(audio_file)
                 audio.play(wavefile)
                 while audio.playing:
@@ -1089,7 +1083,7 @@ class MacroPad:
         elif file_name.lower().endswith(".mp3"):
             with audiopwmio.PWMAudioOut(board.SPEAKER) as audio, open(
                 file_name, "rb"
-            ) as audio_file:  # pylint: disable=not-callable
+            ) as audio_file:
                 mp3file = audiomp3.MP3Decoder(audio_file)
                 audio.play(mp3file)
                 while audio.playing:

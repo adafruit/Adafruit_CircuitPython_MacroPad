@@ -5,8 +5,10 @@
 This simpletest example displays the Blink animation on the
 MacroPad neopixels
 """
+
 from adafruit_led_animation.animation.blink import Blink
 from adafruit_led_animation.color import BLUE
+
 from adafruit_macropad import MacroPad
 
 macropad = MacroPad()

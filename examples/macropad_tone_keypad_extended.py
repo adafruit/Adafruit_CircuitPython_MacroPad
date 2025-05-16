@@ -9,6 +9,7 @@ updating the Neopixels only when one of the key states has changed.
 """
 
 from rainbowio import colorwheel
+
 from adafruit_macropad import MacroPad
 
 macropad = MacroPad()
@@ -79,11 +80,9 @@ while True:
             playing_index = top_index
 
     # There are no keys pressed.
-    else:
-        # If a tone was playing, stop it.
-        if playing_index is not None:
-            macropad.stop_tone()
-            playing_index = None
+    elif playing_index is not None:
+        macropad.stop_tone()
+        playing_index = None
 
     # If a key was pressed or released, update the pixels for the pressed keys.
     if update_pixels:

@@ -5,7 +5,9 @@
 MacroPad tone demo. Plays a different tone for each key pressed and lights up each key a different
 color while the key is pressed.
 """
+
 from rainbowio import colorwheel
+
 from adafruit_macropad import MacroPad
 
 macropad = MacroPad()
@@ -17,9 +19,7 @@ while True:
 
     if key_event:
         if key_event.pressed:
-            macropad.pixels[key_event.key_number] = colorwheel(
-                int(255 / 12) * key_event.key_number
-            )
+            macropad.pixels[key_event.key_number] = colorwheel(int(255 / 12) * key_event.key_number)
             macropad.start_tone(tones[key_event.key_number])
 
         else:
