@@ -4,9 +4,12 @@
 """
 International layout demo for MacroPad.
 """
+
 import time
+
 from keyboard_layout_win_fr import KeyboardLayout
 from keycode_win_fr import Keycode
+
 from adafruit_macropad import MacroPad
 
 macropad = MacroPad(
@@ -39,7 +42,6 @@ while True:
                 macropad.keyboard.press(keycode)
             else:
                 macropad.keyboard_layout.write(keycode)
-        else:
-            if isinstance(keycode, int):
-                macropad.keyboard.release(keycode)
+        elif isinstance(keycode, int):
+            macropad.keyboard.release(keycode)
     time.sleep(0.05)

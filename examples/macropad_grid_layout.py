@@ -5,10 +5,12 @@
 Grid layout demo for MacroPad. Displays the key pressed in a grid matching the key layout on the
 built-in display.
 """
+
 import displayio
 import terminalio
 from adafruit_display_text import bitmap_label as label
 from adafruit_displayio_layout.layouts.grid_layout import GridLayout
+
 from adafruit_macropad import MacroPad
 
 macropad = MacroPad()
@@ -39,6 +41,6 @@ while True:
     key_event = macropad.keys.events.get()
     if key_event:
         if key_event.pressed:
-            labels[key_event.key_number].text = "KEY{}".format(key_event.key_number)
+            labels[key_event.key_number].text = f"KEY{key_event.key_number}"
         else:
             labels[key_event.key_number].text = ""

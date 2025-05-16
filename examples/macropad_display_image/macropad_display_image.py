@@ -4,6 +4,7 @@
 """
 MacroPad display image demo. Displays a bitmap image on the built-in display.
 """
+
 from adafruit_macropad import MacroPad
 
 macropad = MacroPad()
