@@ -323,7 +323,7 @@ class MacroPad:
             Generate key and pixel maps based on a specified order.
             :param order: Tuple containing the order of the keys and pixels.
             """
-            self._key_pins = [getattr(board, "KEY%d" % (num + 1)) for num in order]
+            self._key_pins = [getattr(board, f"KEY{num + 1}") for num in order]
             self._rotated_pixels = _PixelMapLite(self._pixels, order=order)
 
         if rotation == 0:
