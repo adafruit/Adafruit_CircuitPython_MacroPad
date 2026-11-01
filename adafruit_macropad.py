@@ -892,16 +892,15 @@ class MacroPad:
             position = (0, 0)
         group = displayio.Group(scale=1)
         self.display.root_group = group
-        with open(file_name, "rb") as image_file:
-            background = displayio.OnDiskBitmap(image_file)
-            sprite = displayio.TileGrid(
-                background,
-                pixel_shader=background.pixel_shader,
-                x=position[0],
-                y=position[1],
-            )
-            group.append(sprite)
-            self.display.refresh()
+        background = displayio.OnDiskBitmap(file_name)
+        sprite = displayio.TileGrid(
+            background,
+            pixel_shader=background.pixel_shader,
+            x=position[0],
+            y=position[1],
+        )
+        group.append(sprite)
+        self.display.refresh()
 
     @staticmethod
     def display_text(
